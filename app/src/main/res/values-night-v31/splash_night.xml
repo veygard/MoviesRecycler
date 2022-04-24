@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/background_night</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splashscreen_logo_animated</item>
+        <item name="android:windowSplashScreenAnimationDuration">554555</item>
+        <item name="postSplashScreenTheme">@style/Theme.MoviesRecycler</item>
+        <item name="android:windowSplashScreenBrandingImage">@drawable/ic_title</item>
+    </style>
+</resources>

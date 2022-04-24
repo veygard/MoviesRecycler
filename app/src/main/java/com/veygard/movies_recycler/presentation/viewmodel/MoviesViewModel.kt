@@ -7,6 +7,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.icerock.moko.mvvm.livedata.LiveData
 import dev.icerock.moko.mvvm.livedata.MutableLiveData
 import dev.icerock.moko.mvvm.viewmodel.ViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -14,12 +15,17 @@ import javax.inject.Inject
 class MoviesViewModel @Inject constructor(
     private val moviesUseCases: MoviesUseCases
 ) : ViewModel(){
+    init {
+        getMovies()
+    }
 
     private val _getMoviesResponse: MutableLiveData<MoviesStateVM?> = MutableLiveData(null)
     val getMoviesResponse: LiveData<MoviesStateVM?> = _getMoviesResponse
 
     fun getMovies(){
         viewModelScope.launch {
+            //для показа что есть сплеш скрин
+            delay(500)
 
             when(val result= moviesUseCases.getMoviesUseCase.start()){
                 is GetMoviesResult.Success -> {
