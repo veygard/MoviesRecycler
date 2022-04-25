@@ -7,7 +7,19 @@
 
     <fragment
             android:id="@+id/moviesListScreen"
-            android:name="com.veygard.movies_recycler.presentation.screens.MoviesListScreen"
+            android:name="com.veygard.movies_recycler.presentation.screens.MoviesListFragment"
             android:label="fragment_movies_list_screen"
-            tools:layout="@layout/fragment_movies_list_screen" />
+            tools:layout="@layout/fragment_movies_list_screen" >
+        <action
+                android:id="@+id/action_moviesListScreen_to_criticalErrorFragment"
+                app:destination="@id/criticalErrorFragment" />
+    </fragment>
+    <fragment
+            android:id="@+id/criticalErrorFragment"
+            android:name="com.veygard.movies_recycler.presentation.screens.CriticalErrorFragment"
+            android:label="CriticalErrorFragment" >
+        <action
+                android:id="@+id/action_criticalErrorFragment_to_moviesListScreen"
+                app:destination="@id/moviesListScreen" />
+    </fragment>
 </navigation>

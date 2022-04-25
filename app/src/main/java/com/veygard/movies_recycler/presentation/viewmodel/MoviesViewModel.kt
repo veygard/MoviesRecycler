@@ -15,9 +15,7 @@ import javax.inject.Inject
 class MoviesViewModel @Inject constructor(
     private val moviesUseCases: MoviesUseCases
 ) : ViewModel(){
-    init {
-        getMovies()
-    }
+
 
     private val _getMoviesResponse: MutableLiveData<MoviesStateVM?> = MutableLiveData(null)
     val getMoviesResponse: LiveData<MoviesStateVM?> = _getMoviesResponse
@@ -32,6 +30,20 @@ class MoviesViewModel @Inject constructor(
                     _getMoviesResponse.value= MoviesStateVM.GotMovies(result.response)
                 }
                 else -> _getMoviesResponse.value= MoviesStateVM.Error(result, result.error)
+            }
+        }
+    }
+
+    fun setLoading(){
+        _getMoviesResponse.value = MoviesStateVM.Loading
+    }
+
+    fun checkListReadyState(){
+        when(_getMoviesResponse.value){
+            is MoviesStateVM.GotMovies, is MoviesStateVM.Loading -> {}
+            else ->{
+                setLoading()
+                getMovies()
             }
         }
     }
