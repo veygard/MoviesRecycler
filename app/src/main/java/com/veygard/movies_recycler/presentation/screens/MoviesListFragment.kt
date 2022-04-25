@@ -5,13 +5,20 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.DrawableRes
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.veygard.movies_recycler.R
 import com.veygard.movies_recycler.databinding.FragmentMoviesListScreenBinding
+import com.veygard.movies_recycler.presentation.adapters.MovieListAdapter
 import com.veygard.movies_recycler.presentation.navigation.MoviesListRouter
 import com.veygard.movies_recycler.presentation.navigation.MoviesListRouterImpl
 import com.veygard.movies_recycler.presentation.viewmodel.MoviesStateVM
 import com.veygard.movies_recycler.presentation.viewmodel.MoviesViewModel
+import com.veygard.movies_recycler.util.extentions.setDivider
 
 class MoviesListFragment : Fragment() {
 
@@ -46,7 +53,10 @@ class MoviesListFragment : Fragment() {
         viewModel.getMoviesResponse.addObserver {result->
             when(result){
                 is MoviesStateVM.GotMovies ->{
+                    val adapter = MovieListAdapter(movieList = result.result.results ?: emptyList())
+                    binding.movieRecyclerHolder.adapter = adapter
 
+                    binding.movieRecyclerHolder.setDivider(R.drawable.divider_16)
                 }
                 is MoviesStateVM.Error -> {
                     router.routeToCriticalErrorScreen()

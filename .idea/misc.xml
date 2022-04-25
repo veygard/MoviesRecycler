@@ -4,6 +4,8 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/_AndroidStudioProjects/_pet/MoviesRecycler/app/src/main/res/drawable-v24/icon_mr.xml" value="0.2265" />
+        <entry key="..\:/_AndroidStudioProjects/_pet/MoviesRecycler/app/src/main/res/drawable/divider_10dp.xml" value="0.154" />
+        <entry key="..\:/_AndroidStudioProjects/_pet/MoviesRecycler/app/src/main/res/drawable/divider_16.xml" value="0.154" />
         <entry key="..\:/_AndroidStudioProjects/_pet/MoviesRecycler/app/src/main/res/drawable/ic_icon.xml" value="0.2265" />
         <entry key="..\:/_AndroidStudioProjects/_pet/MoviesRecycler/app/src/main/res/drawable/ic_launcher_background.xml" value="0.2265" />
         <entry key="..\:/_AndroidStudioProjects/_pet/MoviesRecycler/app/src/main/res/drawable/ic_launcher_foreground.xml" value="0.2265" />
@@ -19,7 +21,7 @@
         <entry key="..\:/_AndroidStudioProjects/_pet/MoviesRecycler/app/src/main/res/layout/fragment_critical_error.xml" value="0.25" />
         <entry key="..\:/_AndroidStudioProjects/_pet/MoviesRecycler/app/src/main/res/layout/fragment_movies_list.xml" value="0.18704710144927536" />
         <entry key="..\:/_AndroidStudioProjects/_pet/MoviesRecycler/app/src/main/res/layout/fragment_movies_list_screen.xml" value="0.25" />
-        <entry key="..\:/_AndroidStudioProjects/_pet/MoviesRecycler/app/src/main/res/layout/movie_item.xml" value="0.18" />
+        <entry key="..\:/_AndroidStudioProjects/_pet/MoviesRecycler/app/src/main/res/layout/movie_item.xml" value="0.22" />
         <entry key="..\:/_AndroidStudioProjects/_pet/MoviesRecycler/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.2265" />
         <entry key="..\:/_AndroidStudioProjects/_pet/MoviesRecycler/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.18" />
       </map>

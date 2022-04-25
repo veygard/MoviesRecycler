@@ -1,6 +1,6 @@
 package com.veygard.movies_recycler.data.remote.model
 
-data class MovieDTO(
+data class Movie(
     val byline: String,
     val critics_pick: Int,
     val date_updated: String,

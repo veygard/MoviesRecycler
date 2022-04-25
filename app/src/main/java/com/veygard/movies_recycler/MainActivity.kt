@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity() {
         installSplashScreen().apply {
             setKeepOnScreenCondition{
                 Log.d("splash_screen","setKeepOnScreenCondition")
-                viewModel.getMoviesResponse.value != null && viewModel.getMoviesResponse.value != MoviesStateVM.Loading
+                viewModel.getMoviesResponse.value == null && viewModel.getMoviesResponse.value != MoviesStateVM.Loading
             }
         }
         setContentView(R.layout.activity_main)

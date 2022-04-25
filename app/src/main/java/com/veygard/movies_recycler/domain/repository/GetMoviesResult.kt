@@ -1,7 +1,6 @@
 package com.veygard.movies_recycler.domain.repository
 
 import com.veygard.movies_recycler.data.remote.model.GetMoviesResponse
-import com.veygard.movies_recycler.data.remote.model.MovieDTO
 
 
 sealed class GetMoviesResult(open val error: String? = null) {

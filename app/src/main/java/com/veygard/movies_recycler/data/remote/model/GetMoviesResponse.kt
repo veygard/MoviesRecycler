@@ -4,6 +4,6 @@ data class GetMoviesResponse(
     val copyright: String,
     val has_more: Boolean,
     val num_results: Int,
-    val results: List<MovieDTO>,
+    val results: List<Movie>?,
     val status: String
 )
