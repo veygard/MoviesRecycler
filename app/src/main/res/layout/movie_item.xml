@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerHorizontal="true"
+        >
+
+    <ImageView
+            android:layout_width="0dp"
+            android:layout_height="150dp"
+            app:layout_constraintWidth_default="percent"
+            tools:srcCompat="@tools:sample/avatars"
+            android:id="@+id/movie_item_poster"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:contentDescription="@string/cd_poster" />
+
+    <TextView
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            tools:text="@tools:sample/lorem"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/movie_item_title"
+            app:layout_constraintTop_toBottomOf="@+id/movie_item_poster"
+            app:layout_constraintStart_toStartOf="@+id/movie_item_poster"
+            app:layout_constraintEnd_toEndOf="@+id/movie_item_poster"
+            android:layout_marginTop="16dp" />
+
+    <TextView
+            android:textSize="16sp"
+            android:textColor="@color/black"
+            tools:text="@tools:sample/lorem/random"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/movie_item_text"
+            app:layout_constraintTop_toBottomOf="@+id/movie_item_title"
+            app:layout_constraintEnd_toEndOf="@+id/movie_item_poster"
+            app:layout_constraintStart_toStartOf="@+id/movie_item_poster"
+            android:layout_marginTop="16dp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

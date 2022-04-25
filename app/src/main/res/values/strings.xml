@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">MoviesRecycler</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="critical_error_screen_title">Что-то сломалось</string>
     <string name="critical_error_screen_text">Постараемся быстро починить</string>
     <string name="critical_error_screen_again">Попробовать снова</string>
+    <string name="movies_list_title">Обзоры фильмов</string>
+    <string name="cd_poster">poster</string>
 </resources>
