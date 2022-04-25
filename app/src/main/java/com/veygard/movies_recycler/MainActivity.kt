@@ -1,8 +1,10 @@
 package com.veygard.movies_recycler
 
+import android.content.res.Configuration
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.WindowManager
 import androidx.activity.viewModels
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.activityViewModels
@@ -25,8 +27,8 @@ class MainActivity : AppCompatActivity() {
                 viewModel.getMoviesResponse.value == null && viewModel.getMoviesResponse.value != MoviesStateVM.Loading
             }
         }
-        setContentView(R.layout.activity_main)
 
+        setContentView(R.layout.activity_main)
     }
 
 }

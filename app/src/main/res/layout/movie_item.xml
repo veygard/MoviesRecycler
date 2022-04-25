@@ -28,7 +28,7 @@
         <TextView
                 android:textSize="18sp"
                 android:textStyle="bold"
-                android:textColor="@color/black"
+                style="@style/Theme.MoviesRecycler"
                 tools:text="@tools:sample/lorem"
                 android:layout_width="wrap_content"
                 android:textAlignment="center"
@@ -43,7 +43,7 @@
 
         <TextView
                 android:textSize="14sp"
-                android:textColor="@color/black"
+                style="@style/Theme.MoviesRecycler"
                 tools:text="@tools:sample/lorem/random"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
