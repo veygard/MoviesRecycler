@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/nav_root"
+        app:startDestination="@id/moviesListScreen">
+
+    <fragment
+            android:id="@+id/moviesListScreen"
+            android:name="com.veygard.movies_recycler.presentation.screens.MoviesListScreen"
+            android:label="fragment_movies_list_screen"
+            tools:layout="@layout/fragment_movies_list_screen" />
+</navigation>

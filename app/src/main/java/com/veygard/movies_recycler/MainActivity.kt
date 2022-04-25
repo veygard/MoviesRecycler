@@ -19,9 +19,6 @@ class MainActivity : AppCompatActivity() {
                 viewModel.getMoviesResponse.value !=null
             }
         }
-//        setTheme(R.style.Theme_MoviesRecycler)
         setContentView(R.layout.activity_main)
-
-
     }
 }
