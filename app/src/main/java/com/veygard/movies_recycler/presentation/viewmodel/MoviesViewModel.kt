@@ -1,6 +1,6 @@
 package com.veygard.movies_recycler.presentation.viewmodel
 
-import com.veygard.movies_recycler.data.remote.model.GetMoviesResponse
+import com.veygard.movies_recycler.data.remote.model.Movie
 import com.veygard.movies_recycler.domain.repository.GetMoviesResult
 import com.veygard.movies_recycler.domain.use_cases.MoviesUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,6 +16,9 @@ class MoviesViewModel @Inject constructor(
     private val moviesUseCases: MoviesUseCases
 ) : ViewModel(){
 
+    private var hasMoreMovies = true
+    private var pageOffset = 0
+    private var movieList = mutableListOf<Movie>()
 
     private val _getMoviesResponse: MutableLiveData<MoviesStateVM?> = MutableLiveData(null)
     val getMoviesResponse: LiveData<MoviesStateVM?> = _getMoviesResponse
@@ -25,17 +28,31 @@ class MoviesViewModel @Inject constructor(
             //для показа что есть сплеш скрин
             delay(500)
 
-            when(val result= moviesUseCases.getMoviesUseCase.start()){
+            when(val result= moviesUseCases.getMoviesUseCase.start(pageOffset)){
                 is GetMoviesResult.Success -> {
-                    _getMoviesResponse.value= MoviesStateVM.GotMovies(result.response)
+                    result.response.results?.forEach {
+                        if (!movieList.contains(it)) movieList.add(it)
+                    }
+                    pageOffset += result.response.num_results
+
+                    _getMoviesResponse.value= MoviesStateVM.GotMovies((movieList))
+                    hasMoreMovies= result.response.has_more
                 }
-                else -> _getMoviesResponse.value= MoviesStateVM.Error(result, result.error)
+                else -> {
+                    if(movieList.isEmpty()) _getMoviesResponse.value= MoviesStateVM.Error(result, result.error)
+                }
             }
         }
     }
 
     fun setLoading(){
         _getMoviesResponse.value = MoviesStateVM.Loading
+    }
+
+    fun loadMore(){
+        if(hasMoreMovies){
+            getMovies()
+        }
     }
 
     fun checkListReadyState(){

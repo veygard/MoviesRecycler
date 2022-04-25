@@ -1,5 +1,5 @@
 package com.veygard.movies_recycler.domain.repository
 
 interface MoviesRepository {
-    suspend fun getMovies(): GetMoviesResult
+    suspend fun getMovies(pageOffset:Int): GetMoviesResult
 }

@@ -5,11 +5,11 @@ import javax.inject.Inject
 
 class MoviesRepositoryImpl @Inject constructor(private val moviesApi:MoviesApi):MoviesRepository {
 
-    override suspend fun getMovies(): GetMoviesResult {
+    override suspend fun getMovies(pageOffset:Int): GetMoviesResult {
         var result: GetMoviesResult = GetMoviesResult.EnqueueError("MoviesRepositoryImpl getMovies not working")
 
         try {
-            val call =  moviesApi.getMovies()
+            val call =  moviesApi.getMovies(pageOffset)
             when{
                 call.isSuccessful->{
                     call.body()?.let {

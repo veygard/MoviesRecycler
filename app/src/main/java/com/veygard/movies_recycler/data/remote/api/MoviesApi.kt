@@ -13,6 +13,6 @@ interface MoviesApi {
     )
 
     @GET("/svc/movies/v2/reviews/all.json")
-    suspend fun getMovies(): Response<GetMoviesResponse>
+    suspend fun getMovies(@Query("offset") pageOffset:Int = 0): Response<GetMoviesResponse>
 
 }
