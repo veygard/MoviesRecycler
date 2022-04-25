@@ -24,36 +24,31 @@ class MoviesListFragment : Fragment() {
         MoviesListRouterImpl(this)
     }
 
-    private var _binding: FragmentMoviesListScreenBinding? = null
-    private val binding get() = _binding!!
+    private var binding: FragmentMoviesListScreenBinding? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        observeData()
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentMoviesListScreenBinding.inflate(inflater, container, false)
-
-        return binding.root
+    ): View? {
+        binding = FragmentMoviesListScreenBinding.inflate(inflater, container, false)
+        observeData()
+        return binding?.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        observeData()
     }
+
     private fun observeData() {
         viewModel.getMoviesResponse.addObserver {result->
             when(result){
                 is MoviesStateVM.GotMovies ->{
                     val adapter = MovieListAdapter(movieList = result.result.results ?: emptyList())
-                    binding.movieRecyclerHolder.adapter = adapter
-                    val gridLayoutManager= SpanGridLayoutManager(requireContext(),500)
-                    binding.movieRecyclerHolder.setDivider(R.drawable.divider_16)
-                    binding.movieRecyclerHolder.layoutManager= gridLayoutManager
+                    binding?.movieRecyclerHolder?.adapter = adapter
+                    val gridLayoutManager= SpanGridLayoutManager(activity?.baseContext,500)
+                    binding?.movieRecyclerHolder?.layoutManager= gridLayoutManager
                 }
                 is MoviesStateVM.Error -> {
                     router.routeToCriticalErrorScreen()
@@ -61,10 +56,5 @@ class MoviesListFragment : Fragment() {
                 MoviesStateVM.Loading -> {}
             }
         }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 }
