@@ -9,24 +9,8 @@ import com.veygard.movies_recycler.R
 import com.veygard.movies_recycler.data.remote.model.Movie
 import com.veygard.movies_recycler.databinding.MovieItemBinding
 
-class MovieListAdapter(private val movieList: List<Movie>): RecyclerView.Adapter<MovieListAdapter.MovieViewHolder>() {
+class MovieListAdapter(private val movieList: List<Movie>): RecyclerView.Adapter<MovieViewHolder>() {
 
-    class MovieViewHolder(
-        private val binding: MovieItemBinding,
-    ): RecyclerView.ViewHolder(binding.root) {
-
-        fun bind(movie: Movie){
-            binding.movieItemText.text = movie.summary_short
-            binding.movieItemTitle.text= movie.display_title
-
-            binding.movieItemPoster.load(movie.multimedia.src) {
-                crossfade(true)
-                placeholder(R.drawable.ic_movie_placeholder)
-                transformations(CircleCropTransformation())
-                error(R.drawable.ic_movie_error)
-            }
-        }
-    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MovieViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)

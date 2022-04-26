@@ -23,6 +23,10 @@ class MoviesViewModel @Inject constructor(
     private val _getMoviesResponse: MutableLiveData<MoviesStateVM?> = MutableLiveData(null)
     val getMoviesResponse: LiveData<MoviesStateVM?> = _getMoviesResponse
 
+    private val _loadingIsNotBusy = MutableLiveData(true)
+    val loadingIsNotBusy: LiveData<Boolean> = _loadingIsNotBusy
+
+
     fun getMovies(){
         viewModelScope.launch {
             //для показа что есть сплеш скрин
@@ -34,12 +38,14 @@ class MoviesViewModel @Inject constructor(
                         if (!movieList.contains(it)) movieList.add(it)
                     }
                     pageOffset += result.response.num_results
+                    hasMoreMovies= result.response.has_more
+                    _loadingIsNotBusy.value = true
 
                     _getMoviesResponse.value= MoviesStateVM.GotMovies((movieList))
-                    hasMoreMovies= result.response.has_more
                 }
                 else -> {
                     if(movieList.isEmpty()) _getMoviesResponse.value= MoviesStateVM.Error(result, result.error)
+                    _loadingIsNotBusy.value = true
                 }
             }
         }
@@ -51,6 +57,7 @@ class MoviesViewModel @Inject constructor(
 
     fun loadMore(){
         if(hasMoreMovies){
+            _loadingIsNotBusy.value = false
             getMovies()
         }
     }
