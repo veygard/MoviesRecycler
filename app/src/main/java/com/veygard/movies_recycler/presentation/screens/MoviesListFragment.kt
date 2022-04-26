@@ -11,13 +11,17 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.veygard.movies_recycler.data.remote.model.Movie
 import com.veygard.movies_recycler.databinding.FragmentMoviesListScreenBinding
+import com.veygard.movies_recycler.domain.model.MovieWithShimmer
 import com.veygard.movies_recycler.presentation.adapters.MovieListAdapter
 import com.veygard.movies_recycler.presentation.adapters.MovieViewHolder
 import com.veygard.movies_recycler.presentation.navigation.MoviesListRouter
 import com.veygard.movies_recycler.presentation.navigation.MoviesListRouterImpl
 import com.veygard.movies_recycler.presentation.viewmodel.MoviesStateVM
 import com.veygard.movies_recycler.presentation.viewmodel.MoviesViewModel
+import com.veygard.movies_recycler.util.SnackbarTypes
 import com.veygard.movies_recycler.util.SpanGridLayoutManager
+import com.veygard.movies_recycler.util.isInternetConnected
+import com.veygard.movies_recycler.util.showToast
 
 class MoviesListFragment : Fragment() {
 
@@ -47,7 +51,7 @@ class MoviesListFragment : Fragment() {
     private fun observeData() {
         viewModel.getMoviesResponse.addObserver { result ->
             when (result) {
-                is MoviesStateVM.GotMovies -> {
+                is MoviesStateVM.GotMoviesShimmer -> {
                     setupMovieRecycler(result.list)
                 }
                 is MoviesStateVM.Error -> {
@@ -56,9 +60,15 @@ class MoviesListFragment : Fragment() {
                 MoviesStateVM.Loading -> {}
             }
         }
+
+        viewModel.showSnackbar.addObserver {
+            it?.let {
+                showToast(it, activity?.applicationContext)
+            }
+        }
     }
 
-    private fun setupMovieRecycler(results: List<Movie>?) {
+    private fun setupMovieRecycler(results: List<MovieWithShimmer>?) {
         val adapter = MovieListAdapter(movieList = results ?: emptyList())
         binding?.movieRecyclerHolder?.adapter = adapter
         val gridLayoutManager = SpanGridLayoutManager(activity?.baseContext, 500)
@@ -66,17 +76,20 @@ class MoviesListFragment : Fragment() {
     }
 
     private fun setNestedScrollListener() {
-        binding?.moviesNestedScroll?.setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener { v, _, scrollY, _, _ ->
+        binding?.moviesNestedScroll?.setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener { v, _, scrollY, _, oldScrollY ->
 
             //грузить начинаем как только проходим отметку в 5 айтемов до конца вьюшки
             val loadMoreCoordinates =
-                (v.getChildAt(0).measuredHeight - v.measuredHeight) - (MovieViewHolder.movieItemHeight * 5)
+                (v.getChildAt(0).measuredHeight - v.measuredHeight) - MovieViewHolder.movieItemHeight * 5
 
             Log.d("nested_coordinates", "scrollY: $scrollY,  measuredHeight: $loadMoreCoordinates")
-            if (scrollY > loadMoreCoordinates && viewModel.loadingIsNotBusy.value) {
-                Log.d("nested_coordinates", "true")
-                Toast.makeText(requireContext(), "new data", Toast.LENGTH_SHORT).show()
-                viewModel.loadMore()
+            when {
+                scrollY >= loadMoreCoordinates && viewModel.loadingIsNotBusy.value && scrollY > oldScrollY && isInternetConnected(
+                    activity?.applicationContext
+                ) -> {
+                    Log.d("nested_coordinates", "true")
+                    viewModel.loadMore()
+                }
             }
         })
     }

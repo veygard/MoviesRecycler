@@ -12,4 +12,7 @@
     <color name="blue">#204EAA</color>
     <color name="white">#FFFFFFFF</color>
     <color name="background_night">#3C3838</color>
+    <color name="shimmer_placeholder">#dddddd</color>
+    <color name="transparent">#00000000 </color>
+    <color name="error">#F44336</color>(
 </resources>
