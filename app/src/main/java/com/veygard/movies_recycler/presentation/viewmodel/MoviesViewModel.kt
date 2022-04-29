@@ -45,8 +45,8 @@ class MoviesViewModel @Inject constructor(
                     result.response.results?.forEach {
                         if (!movieList.contains(it)) movieList.add(it)
                     }
-                    pageOffset += result.response.num_results
-                    hasMoreMovies= result.response.has_more
+                    pageOffset += result.response.num_results ?: 0
+                    hasMoreMovies= result.response.has_more ?: false
                     _loadingIsNotBusy.value = true
 
                     when(isAdditionalLoading){

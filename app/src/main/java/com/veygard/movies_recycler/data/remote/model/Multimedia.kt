@@ -1,8 +1,8 @@
 package com.veygard.movies_recycler.data.remote.model
 
 data class Multimedia(
-    val height: Int,
-    val src: String,
-    val type: String,
-    val width: Int
+    val height: Int? = null,
+    val src: String? = null,
+    val type: String? = null,
+    val width: Int? = null
 )

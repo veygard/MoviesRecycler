@@ -23,7 +23,7 @@ class MovieViewHolder(
         binding.movieItemText.text = movie.summary_short
         binding.movieItemTitle.text= movie.display_title
 
-        binding.movieItemPoster.load(movie.multimedia.src ?: "") {
+        binding.movieItemPoster.load(movie.multimedia?.src ?: "") {
             crossfade(true)
             placeholder(R.drawable.ic_movie_placeholder)
             transformations(CircleCropTransformation())
