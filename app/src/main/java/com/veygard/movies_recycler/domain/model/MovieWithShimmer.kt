@@ -16,3 +16,6 @@ enum class RowType {
     Shimmer
 }
 
+fun Movie.toMovieShimmerType() : MovieWithShimmer.Movies = MovieWithShimmer.Movies(this)
+fun List<Movie>.toMovieShimmerList() : List<MovieWithShimmer> = this.map { it.toMovieShimmerType() }
+

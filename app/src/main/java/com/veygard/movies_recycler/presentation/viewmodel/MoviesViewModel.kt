@@ -25,43 +25,41 @@ class MoviesViewModel @Inject constructor(
     private var hasMoreMovies = true
     private var pageOffset = 0
     private var movieList = mutableListOf<Movie>()
-    private var movieListShimmer = mutableListOf<MovieWithShimmer>()
 
     private val _getMoviesResponse: MutableLiveData<MoviesStateVM?> = MutableLiveData(null)
     val getMoviesResponse: LiveData<MoviesStateVM?> = _getMoviesResponse
 
-    private val _loadingIsNotBusy = MutableLiveData(true)
-    val loadingIsNotBusy: LiveData<Boolean> = _loadingIsNotBusy
-
     private val _showSnackbar: MutableLiveData<SnackbarTypes?> = MutableLiveData(null)
     val showSnackbar: LiveData<SnackbarTypes?>  = _showSnackbar
 
-    fun getMovies(){
+    private val _loadingIsNotBusy = MutableLiveData(true)
+    val loadingIsNotBusy: LiveData<Boolean> = _loadingIsNotBusy
+
+    fun getMovies(isAdditionalLoading: Boolean = false){
         viewModelScope.launch {
             //для показа что есть сплеш скрин и шиммер, в "релизе" удалить
             delay(700)
 
             when(val result= moviesUseCases.getMoviesUseCase.start(pageOffset)){
                 is GetMoviesResult.Success -> {
-                    removeShimmer()
                     result.response.results?.forEach {
-                        movieListShimmer.add(MovieWithShimmer.Movies(it))
+                        if (!movieList.contains(it)) movieList.add(it)
                     }
-
-
                     pageOffset += result.response.num_results
                     hasMoreMovies= result.response.has_more
                     _loadingIsNotBusy.value = true
 
-                    _getMoviesResponse.value= MoviesStateVM.GotMoviesShimmer((movieListShimmer))
+                    when(isAdditionalLoading){
+                        true -> _getMoviesResponse.value= MoviesStateVM.MoreMovies(result.response.results)
+                        false -> _getMoviesResponse.value= MoviesStateVM.GotMovies(movieList)
+                    }
+
                 }
                 else -> {
-                    if(movieListShimmer.isEmpty()) _getMoviesResponse.value= MoviesStateVM.Error(result, result.error)
+                    if(movieList.isEmpty()) _getMoviesResponse.value= MoviesStateVM.Error(result, result.error)
                     else{
                         _loadingIsNotBusy.value = true
-                        removeShimmer()
                         _showSnackbar.value = SnackbarTypes.ConnectionError
-                        _getMoviesResponse.value = MoviesStateVM.GotMoviesShimmer(movieListShimmer)
                     }
 
                 }
@@ -69,9 +67,6 @@ class MoviesViewModel @Inject constructor(
         }
     }
 
-    private fun removeShimmer() {
-        movieListShimmer = movieListShimmer.filter { it.rowType == RowType.Item }.toMutableList()
-    }
 
     fun setLoading(){
         _getMoviesResponse.value = MoviesStateVM.Loading
@@ -80,21 +75,7 @@ class MoviesViewModel @Inject constructor(
     fun loadMore(){
         if(hasMoreMovies){
             _loadingIsNotBusy.value = false
-            for(i in 0..10){
-                movieListShimmer.add(MovieWithShimmer.Shimmer)
-            }
-            _getMoviesResponse.value = MoviesStateVM.GotMoviesShimmer(movieListShimmer)
-            getMovies()
-        }
-    }
-
-    fun checkListReadyState(){
-        when(_getMoviesResponse.value){
-            is MoviesStateVM.GotMovies, is MoviesStateVM.Loading -> {}
-            else ->{
-                setLoading()
-                getMovies()
-            }
+            getMovies(true)
         }
     }
 }

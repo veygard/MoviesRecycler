@@ -14,6 +14,7 @@ import com.veygard.movies_recycler.databinding.FragmentMoviesListScreenBinding
 import com.veygard.movies_recycler.domain.model.MovieWithShimmer
 import com.veygard.movies_recycler.presentation.adapters.MovieListAdapter
 import com.veygard.movies_recycler.presentation.adapters.MovieViewHolder
+import com.veygard.movies_recycler.presentation.adapters.PaginationScrollListener
 import com.veygard.movies_recycler.presentation.navigation.MoviesListRouter
 import com.veygard.movies_recycler.presentation.navigation.MoviesListRouterImpl
 import com.veygard.movies_recycler.presentation.viewmodel.MoviesStateVM
@@ -30,6 +31,7 @@ class MoviesListFragment : Fragment() {
     private val router: MoviesListRouter by lazy {
         MoviesListRouterImpl(this)
     }
+    private var adapter:  MovieListAdapter? = null
 
     private var binding: FragmentMoviesListScreenBinding? = null
 
@@ -45,19 +47,23 @@ class MoviesListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         observeData()
-        setNestedScrollListener()
     }
 
     private fun observeData() {
         viewModel.getMoviesResponse.addObserver { result ->
             when (result) {
-                is MoviesStateVM.GotMoviesShimmer -> {
+                is MoviesStateVM.GotMovies -> {
                     setupMovieRecycler(result.list)
                 }
                 is MoviesStateVM.Error -> {
                     router.routeToCriticalErrorScreen()
                 }
-                MoviesStateVM.Loading -> {}
+
+                is MoviesStateVM.MoreMovies -> {
+                    result.more?.let {
+                       adapter?.addNewItems(it)
+                    }
+                }
             }
         }
 
@@ -68,29 +74,27 @@ class MoviesListFragment : Fragment() {
         }
     }
 
-    private fun setupMovieRecycler(results: List<MovieWithShimmer>?) {
-        val adapter = MovieListAdapter(movieList = results ?: emptyList())
+    private fun setupMovieRecycler(results: List<Movie>?) {
+        adapter = MovieListAdapter(movieList = results ?: emptyList())
         binding?.movieRecyclerHolder?.adapter = adapter
         val gridLayoutManager = SpanGridLayoutManager(activity?.baseContext, 500)
         binding?.movieRecyclerHolder?.layoutManager = gridLayoutManager
+        setMovieRecyclerListener(gridLayoutManager)
     }
 
-    private fun setNestedScrollListener() {
-        binding?.moviesNestedScroll?.setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener { v, _, scrollY, _, oldScrollY ->
-
-            //грузить начинаем как только проходим отметку в 5 айтемов до конца вьюшки
-            val loadMoreCoordinates =
-                (v.getChildAt(0).measuredHeight - v.measuredHeight) - MovieViewHolder.movieItemHeight * 5
-
-            Log.d("nested_coordinates", "scrollY: $scrollY,  measuredHeight: $loadMoreCoordinates")
-            when {
-                scrollY >= loadMoreCoordinates && viewModel.loadingIsNotBusy.value && scrollY > oldScrollY && isInternetConnected(
-                    activity?.applicationContext
-                ) -> {
-                    Log.d("nested_coordinates", "true")
+    private fun setMovieRecyclerListener(gridLayoutManager: SpanGridLayoutManager) {
+        binding?.movieRecyclerHolder?.addOnScrollListener(object: PaginationScrollListener(gridLayoutManager) {
+            override fun loadMoreItems() {
+                if(viewModel.loadingIsNotBusy.value) {
                     viewModel.loadMore()
+                    adapter?.addShimmers()
                 }
             }
+
+            override val isLastPage: Boolean
+                get() = false
+            override val isLoading: Boolean
+                get() = false
         })
     }
 }

@@ -1,5 +1,6 @@
 package com.veygard.movies_recycler.presentation.adapters
 
+import android.util.Log
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.veygard.movies_recycler.util.SpanGridLayoutManager
@@ -12,10 +13,13 @@ abstract class PaginationScrollListener(private val layoutManager: SpanGridLayou
         val visibleItemCount = layoutManager.childCount
         val totalItemCount = layoutManager.itemCount
         val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
+//        Log.d("pagination_test","visibleItemCount: $visibleItemCount, totalItemCount:$totalItemCount, firstVisibleItemPosition:$firstVisibleItemPosition")
+
         if (!isLoading && !isLastPage) {
             if (visibleItemCount + firstVisibleItemPosition >= totalItemCount
                 && firstVisibleItemPosition >= 0
             ) {
+                Log.d("pagination_test","loading")
                 loadMoreItems()
             }
         }
