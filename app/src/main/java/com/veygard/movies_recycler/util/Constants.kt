@@ -1,6 +1,5 @@
 package com.veygard.movies_recycler.util
 
-import java.time.LocalDate
 
 object Constants {
     const val BASE_URL = "https://api.nytimes.com"

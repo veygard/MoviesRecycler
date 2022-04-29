@@ -58,7 +58,7 @@ class MovieListAdapter(private val movieList: List<Movie>): RecyclerView.Adapter
         notifyDataSetChanged()
     }
 
-    private fun removeShimmers(){
+    fun removeShimmers(){
 //        val iterator= list.iterator()
 //        while (iterator.hasNext()){
 //            val item = iterator.next()

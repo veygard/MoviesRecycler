@@ -60,6 +60,7 @@ class MoviesViewModel @Inject constructor(
                     else{
                         _loadingIsNotBusy.value = true
                         _showSnackbar.value = SnackbarTypes.ConnectionError
+                        _getMoviesResponse.value = MoviesStateVM.MoreMoviesError
                     }
 
                 }

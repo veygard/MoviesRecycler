@@ -64,6 +64,7 @@ class MoviesListFragment : Fragment() {
                        adapter?.addNewItems(it)
                     }
                 }
+                is MoviesStateVM.MoreMoviesError -> adapter?.removeShimmers()
             }
         }
 
@@ -85,7 +86,7 @@ class MoviesListFragment : Fragment() {
     private fun setMovieRecyclerListener(gridLayoutManager: SpanGridLayoutManager) {
         binding?.movieRecyclerHolder?.addOnScrollListener(object: PaginationScrollListener(gridLayoutManager) {
             override fun loadMoreItems() {
-                if(viewModel.loadingIsNotBusy.value) {
+                if(viewModel.loadingIsNotBusy.value && isInternetConnected(activity?.applicationContext)) {
                     viewModel.loadMore()
                     adapter?.addShimmers()
                 }
