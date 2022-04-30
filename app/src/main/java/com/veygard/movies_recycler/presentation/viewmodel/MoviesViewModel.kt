@@ -22,45 +22,45 @@ import javax.inject.Inject
 @HiltViewModel
 class MoviesViewModel @Inject constructor(
     private val moviesUseCases: MoviesUseCases
-) : ViewModel(){
+) : ViewModel() {
 
     private var hasMoreMovies = true
     private var pageOffset = 0
     private var movieList = mutableListOf<Movie>()
 
 
-
     private val _getMoviesResponse: MutableLiveData<MoviesStateVM?> = MutableLiveData(null)
     val getMoviesResponse: LiveData<MoviesStateVM?> = _getMoviesResponse
 
     private val _showSnackbar: MutableLiveData<SnackbarTypes?> = MutableLiveData(null)
-    val showSnackbar: LiveData<SnackbarTypes?>  = _showSnackbar
+    val showSnackbar: LiveData<SnackbarTypes?> = _showSnackbar
 
     private val _loadingIsNotBusy = MutableLiveData(true)
     val loadingIsNotBusy: LiveData<Boolean> = _loadingIsNotBusy
 
+    private val _showLoadingBar = MutableLiveData(false)
+    val showLoadingBar: LiveData<Boolean> =  _showLoadingBar
 
-    fun getMovies(isAdditionalLoading: Boolean = false){
+    fun getMovies(isAdditionalLoading: Boolean = false) {
         viewModelScope.launch {
-
-            when(val result= moviesUseCases.getMoviesUseCase.start(pageOffset)){
+            when (val result = moviesUseCases.getMoviesUseCase.start(pageOffset)) {
                 is GetMoviesResult.Success -> {
                     result.response.results?.forEach {
                         if (!movieList.contains(it)) movieList.add(it)
                     }
                     pageOffset += result.response.num_results ?: 0
-                    hasMoreMovies= result.response.has_more ?: false
+                    hasMoreMovies = result.response.has_more ?: false
                     _loadingIsNotBusy.value = true
-                    when(isAdditionalLoading){
-                        true -> _getMoviesResponse.value= MoviesStateVM.MoreMovies(result.response.results)
-                        false -> _getMoviesResponse.value= MoviesStateVM.GotMovies(movieList)
+                    when (isAdditionalLoading) {
+                        true -> _getMoviesResponse.value =
+                            MoviesStateVM.MoreMovies(result.response.results)
+                        false -> _getMoviesResponse.value = MoviesStateVM.GotMovies(movieList)
                     }
-
                 }
                 else -> {
-
-                    if(movieList.isEmpty()) _getMoviesResponse.value= MoviesStateVM.Error(result, result.error)
-                    else{
+                    if (movieList.isEmpty()) _getMoviesResponse.value =
+                        MoviesStateVM.Error(result, result.error)
+                    else {
                         _loadingIsNotBusy.value = true
                         _showSnackbar.value = SnackbarTypes.ConnectionError
                         _getMoviesResponse.value = MoviesStateVM.MoreMoviesError
@@ -70,13 +70,8 @@ class MoviesViewModel @Inject constructor(
         }
     }
 
-
-    fun setLoading(){
-        _getMoviesResponse.value = MoviesStateVM.Loading
-    }
-
-    fun loadMore(){
-        if(hasMoreMovies){
+    fun loadMore() {
+        if (hasMoreMovies) {
             _loadingIsNotBusy.value = false
             getMovies(true)
         } else {
@@ -84,4 +79,21 @@ class MoviesViewModel @Inject constructor(
         }
     }
 
+    fun searchMovie(name: String) {
+        viewModelScope.launch {
+            _showLoadingBar.value = true
+            when (val result = moviesUseCases.searchMovieUseCase.start(name)) {
+                is GetMoviesResult.Success -> {
+                    _getMoviesResponse.value =
+                        MoviesStateVM.SearchMovies(result.response.results ?: emptyList())
+                    _showLoadingBar.value = false
+                }
+                else -> {
+                    _showLoadingBar.value = false
+                    _showSnackbar.value = SnackbarTypes.ConnectionError
+                    _getMoviesResponse.value = MoviesStateVM.SearchMovies(emptyList())
+                }
+            }
+        }
+    }
 }

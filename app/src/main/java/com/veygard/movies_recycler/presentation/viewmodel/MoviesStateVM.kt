@@ -7,6 +7,7 @@ import com.veygard.movies_recycler.domain.repository.GetMoviesResult
 
 sealed class MoviesStateVM {
     data class GotMovies(val list: List<Movie>): MoviesStateVM()
+    data class SearchMovies(val list: List<Movie>): MoviesStateVM()
     data class MoreMovies(val more: List<Movie>?): MoviesStateVM()
     object MoreMoviesError: MoviesStateVM()
     data class Error(val result: GetMoviesResult, val msg:String?): MoviesStateVM()
