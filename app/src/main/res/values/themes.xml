@@ -32,4 +32,12 @@
         <item name="android:orientation">vertical</item>
     </style>
 
+    <style name="SearchViewStyle" parent="Widget.AppCompat.Light.SearchView">
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">@color/purple_700</item>
+        <item name="colorPrimary"> #80DEEA</item>
+        <item name="colorPrimaryDark">#00BCD4</item>
+        <item name="colorAccent">#80DEEA</item>
+    </style>
+
 </resources>

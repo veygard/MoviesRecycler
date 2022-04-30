@@ -8,5 +8,6 @@
     <string name="snackbar_error_message">Не могу обновить данные.\nПроверь соединение с интернетом.</string>
     <string name="snackbar_no_movies_message">В базе данных больше нет фильмов</string>
     <string name="snackbar_time_message">Гружу данные из сервера, потребуется %1$d секунд</string>
-
+    <string name="search_field_placeholder">Введите название фильма</string>
+    <string name="cancel_button_title">Отмена</string>
 </resources>
