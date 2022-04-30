@@ -14,7 +14,7 @@ abstract class PaginationScrollListener(private val layoutManager: SpanGridLayou
         val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
 //        Log.d("pagination_test","visibleItemCount: $visibleItemCount, totalItemCount:$totalItemCount, firstVisibleItemPosition:$firstVisibleItemPosition")
 
-        if (isReadyToLoad && !isLastPage && isInternetAvailable) {
+        if (isReadyToLoad && !isLastPage && isInternetAvailable && hasMoreMovies) {
             if (visibleItemCount + firstVisibleItemPosition >= totalItemCount
                 && firstVisibleItemPosition >= 0
             ) {
@@ -28,5 +28,6 @@ abstract class PaginationScrollListener(private val layoutManager: SpanGridLayou
     abstract val isLastPage: Boolean
     abstract val isInternetAvailable: Boolean
     abstract val isReadyToLoad: Boolean
+    abstract val hasMoreMovies: Boolean
 
 }

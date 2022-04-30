@@ -1,26 +1,24 @@
 package com.veygard.movies_recycler.presentation.screens
 
+import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
+import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
-import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import com.veygard.movies_recycler.R
 import com.veygard.movies_recycler.data.remote.model.Movie
 import com.veygard.movies_recycler.databinding.FragmentMoviesListScreenBinding
-import com.veygard.movies_recycler.domain.model.MovieWithShimmer
 import com.veygard.movies_recycler.presentation.adapters.MovieListAdapter
-import com.veygard.movies_recycler.presentation.adapters.MovieViewHolder
 import com.veygard.movies_recycler.presentation.adapters.PaginationScrollListener
 import com.veygard.movies_recycler.presentation.navigation.MoviesListRouter
 import com.veygard.movies_recycler.presentation.navigation.MoviesListRouterImpl
 import com.veygard.movies_recycler.presentation.viewmodel.MoviesStateVM
 import com.veygard.movies_recycler.presentation.viewmodel.MoviesViewModel
-import com.veygard.movies_recycler.util.SnackbarTypes
 import com.veygard.movies_recycler.util.SpanGridLayoutManager
+import com.veygard.movies_recycler.util.extentions.onQueryTextChanged
 import com.veygard.movies_recycler.util.isInternetConnected
 import com.veygard.movies_recycler.util.showToast
 
@@ -31,9 +29,10 @@ class MoviesListFragment : Fragment() {
     private val router: MoviesListRouter by lazy {
         MoviesListRouterImpl(this)
     }
-    private var adapter:  MovieListAdapter? = null
+    private var adapter: MovieListAdapter? = null
 
     private var binding: FragmentMoviesListScreenBinding? = null
+    private var mHandler = Handler()
 
 
     override fun onCreateView(
@@ -47,6 +46,8 @@ class MoviesListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         observeData()
+        searchViewListener()
+        cancelButtonListener()
     }
 
     private fun observeData() {
@@ -61,10 +62,14 @@ class MoviesListFragment : Fragment() {
 
                 is MoviesStateVM.MoreMovies -> {
                     result.more?.let {
-                       adapter?.addNewItems(it)
+                        adapter?.addNewItems(it)
                     }
                 }
                 is MoviesStateVM.MoreMoviesError -> adapter?.removeShimmers()
+
+                is MoviesStateVM.SearchMovies -> {
+                    setupMovieRecycler(result.list)
+                }
             }
         }
 
@@ -83,11 +88,39 @@ class MoviesListFragment : Fragment() {
         setMovieRecyclerListener(gridLayoutManager)
     }
 
+    private fun searchViewListener() {
+        binding?.searchBar?.onQueryTextChanged { text ->
+            mHandler.removeCallbacksAndMessages(null)
+
+            when {
+                text.isNotEmpty() -> {
+                    mHandler.postDelayed(Runnable {
+                        viewModel.searchMovie(text)
+                    }, 700)
+                }
+                else -> {
+                    viewModel.turnOffSearch()
+                }
+            }
+
+            toggleVisibility(text.isEmpty(), binding?.cancelButton)
+            toggleSearchViewIconColor(text.isNotEmpty())
+        }
+    }
+
+    private fun cancelButtonListener() {
+        binding?.cancelButton?.setOnClickListener {
+            binding?.searchBar?.setQuery("", false)
+            binding?.searchBar?.clearFocus()
+        }
+    }
+
     private fun setMovieRecyclerListener(gridLayoutManager: SpanGridLayoutManager) {
-        binding?.movieRecyclerHolder?.addOnScrollListener(object: PaginationScrollListener(gridLayoutManager) {
+        binding?.movieRecyclerHolder?.addOnScrollListener(object :
+            PaginationScrollListener(gridLayoutManager) {
             override fun loadMoreItems() {
-                    viewModel.loadMore()
-                    adapter?.addShimmers()
+                viewModel.loadMore()
+                adapter?.addShimmers()
             }
 
             override val isLastPage: Boolean
@@ -96,6 +129,24 @@ class MoviesListFragment : Fragment() {
                 get() = isInternetConnected(activity?.applicationContext)
             override val isReadyToLoad: Boolean
                 get() = viewModel.loadingIsNotBusy.value
+            override val hasMoreMovies: Boolean
+                get() = viewModel.hasMoreMovies.value
         })
+    }
+
+    private fun toggleVisibility(gone: Boolean, view: View?) {
+        if (gone) view?.visibility = View.GONE
+        else view?.visibility = View.VISIBLE
+    }
+
+    private fun toggleSearchViewIconColor(isNotEmpty: Boolean) {
+        val icon = binding?.searchIcon
+
+        if (isNotEmpty) icon?.setColorFilter(
+            context?.getColor(R.color.blue) ?: Color.BLACK
+        )
+        else icon?.setColorFilter(
+            context?.getColor(R.color.grey) ?: Color.LTGRAY
+        )
     }
 }

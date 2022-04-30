@@ -24,9 +24,10 @@ class MoviesViewModel @Inject constructor(
     private val moviesUseCases: MoviesUseCases
 ) : ViewModel() {
 
-    private var hasMoreMovies = true
     private var pageOffset = 0
+    private var searchPageOffset = 0
     private var movieList = mutableListOf<Movie>()
+    private var searchValue= ""
 
 
     private val _getMoviesResponse: MutableLiveData<MoviesStateVM?> = MutableLiveData(null)
@@ -41,6 +42,13 @@ class MoviesViewModel @Inject constructor(
     private val _showLoadingBar = MutableLiveData(false)
     val showLoadingBar: LiveData<Boolean> =  _showLoadingBar
 
+    private val _irSearchOn = MutableLiveData(false)
+    val irSearchOn: LiveData<Boolean> =  _irSearchOn
+
+    private val _hasMoreMovies = MutableLiveData(false)
+    val hasMoreMovies: LiveData<Boolean> =  _hasMoreMovies
+
+
     fun getMovies(isAdditionalLoading: Boolean = false) {
         viewModelScope.launch {
             when (val result = moviesUseCases.getMoviesUseCase.start(pageOffset)) {
@@ -49,7 +57,7 @@ class MoviesViewModel @Inject constructor(
                         if (!movieList.contains(it)) movieList.add(it)
                     }
                     pageOffset += result.response.num_results ?: 0
-                    hasMoreMovies = result.response.has_more ?: false
+                    _hasMoreMovies.value = result.response.has_more ?: false
                     _loadingIsNotBusy.value = true
                     when (isAdditionalLoading) {
                         true -> _getMoviesResponse.value =
@@ -71,19 +79,30 @@ class MoviesViewModel @Inject constructor(
     }
 
     fun loadMore() {
-        if (hasMoreMovies) {
-            _loadingIsNotBusy.value = false
-            getMovies(true)
-        } else {
-            _showSnackbar.value = SnackbarTypes.NoMoviesLeft
+        if(_irSearchOn.value){
+            if (_hasMoreMovies.value) {
+                searchMovie(searchValue)
+            }
+        }else {
+            if (_hasMoreMovies.value) {
+                _loadingIsNotBusy.value = false
+                getMovies(true)
+            } else {
+                _showSnackbar.value = SnackbarTypes.NoMoviesLeft
+            }
         }
     }
 
     fun searchMovie(name: String) {
         viewModelScope.launch {
+            searchValue= name
+            _irSearchOn.value= true
+
             _showLoadingBar.value = true
             when (val result = moviesUseCases.searchMovieUseCase.start(name)) {
                 is GetMoviesResult.Success -> {
+                    _hasMoreMovies.value = result.response.has_more ?: false
+                    searchPageOffset += result.response.num_results ?: 0
                     _getMoviesResponse.value =
                         MoviesStateVM.SearchMovies(result.response.results ?: emptyList())
                     _showLoadingBar.value = false
@@ -95,5 +114,12 @@ class MoviesViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    fun turnOffSearch(){
+        _irSearchOn.value= false
+        _hasMoreMovies.value = true
+        if(movieList.isNotEmpty()) _getMoviesResponse.value = MoviesStateVM.GotMovies(movieList)
+        else getMovies()
     }
 }

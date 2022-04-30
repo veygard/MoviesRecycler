@@ -16,6 +16,6 @@ interface MoviesApi {
     suspend fun getMovies(@Query("offset") pageOffset:Int = 0): Response<GetMoviesResponse>
 
     @GET("/svc/movies/v2/reviews/search.json")
-    suspend fun searchMovies(@Query("query") name:String): Response<GetMoviesResponse>
+    suspend fun searchMovies(@Query("query") name:String, @Query("offset") pageOffset:Int = 0): Response<GetMoviesResponse>
 
 }
