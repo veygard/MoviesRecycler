@@ -1,13 +1,14 @@
 package com.veygard.movies_recycler.domain.repository
 
 import com.veygard.movies_recycler.data.remote.api.MoviesApi
+import com.veygard.movies_recycler.data.remote.supports.MovieApiTimeoutControl
 import javax.inject.Inject
 
-class MoviesRepositoryImpl @Inject constructor(private val moviesApi:MoviesApi):MoviesRepository {
+class MoviesRepositoryImpl @Inject constructor(private val moviesApi:MoviesApi, private val timeout: MovieApiTimeoutControl):MoviesRepository {
 
     override suspend fun getMovies(pageOffset:Int): GetMoviesResult {
         var result: GetMoviesResult = GetMoviesResult.EnqueueError("MoviesRepositoryImpl getMovies not working")
-
+        timeout.checkCounter()
         try {
             val call =  moviesApi.getMovies(pageOffset)
             when{

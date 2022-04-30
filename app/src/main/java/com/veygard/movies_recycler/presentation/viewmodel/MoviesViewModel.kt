@@ -1,5 +1,6 @@
 package com.veygard.movies_recycler.presentation.viewmodel
 
+import android.util.Log
 import com.veygard.movies_recycler.data.remote.model.Movie
 import com.veygard.movies_recycler.domain.model.MovieWithShimmer
 import com.veygard.movies_recycler.domain.model.RowType
@@ -15,6 +16,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @HiltViewModel
@@ -26,6 +28,8 @@ class MoviesViewModel @Inject constructor(
     private var pageOffset = 0
     private var movieList = mutableListOf<Movie>()
 
+
+
     private val _getMoviesResponse: MutableLiveData<MoviesStateVM?> = MutableLiveData(null)
     val getMoviesResponse: LiveData<MoviesStateVM?> = _getMoviesResponse
 
@@ -35,10 +39,9 @@ class MoviesViewModel @Inject constructor(
     private val _loadingIsNotBusy = MutableLiveData(true)
     val loadingIsNotBusy: LiveData<Boolean> = _loadingIsNotBusy
 
+
     fun getMovies(isAdditionalLoading: Boolean = false){
         viewModelScope.launch {
-            //для показа что есть сплеш скрин и шиммер, в "релизе" удалить
-            delay(700)
 
             when(val result= moviesUseCases.getMoviesUseCase.start(pageOffset)){
                 is GetMoviesResult.Success -> {
@@ -48,7 +51,6 @@ class MoviesViewModel @Inject constructor(
                     pageOffset += result.response.num_results ?: 0
                     hasMoreMovies= result.response.has_more ?: false
                     _loadingIsNotBusy.value = true
-
                     when(isAdditionalLoading){
                         true -> _getMoviesResponse.value= MoviesStateVM.MoreMovies(result.response.results)
                         false -> _getMoviesResponse.value= MoviesStateVM.GotMovies(movieList)
@@ -56,13 +58,13 @@ class MoviesViewModel @Inject constructor(
 
                 }
                 else -> {
+
                     if(movieList.isEmpty()) _getMoviesResponse.value= MoviesStateVM.Error(result, result.error)
                     else{
                         _loadingIsNotBusy.value = true
                         _showSnackbar.value = SnackbarTypes.ConnectionError
                         _getMoviesResponse.value = MoviesStateVM.MoreMoviesError
                     }
-
                 }
             }
         }
@@ -77,6 +79,9 @@ class MoviesViewModel @Inject constructor(
         if(hasMoreMovies){
             _loadingIsNotBusy.value = false
             getMovies(true)
+        } else {
+//            _showSnackbar.value =
         }
     }
+
 }

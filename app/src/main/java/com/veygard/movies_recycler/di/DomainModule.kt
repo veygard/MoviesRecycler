@@ -1,6 +1,7 @@
 package com.veygard.movies_recycler.di
 
 import com.veygard.movies_recycler.data.remote.api.MoviesApi
+import com.veygard.movies_recycler.data.remote.supports.MovieApiTimeoutControl
 import com.veygard.movies_recycler.domain.repository.MoviesRepository
 import com.veygard.movies_recycler.domain.repository.MoviesRepositoryImpl
 import com.veygard.movies_recycler.domain.use_cases.GetMoviesUseCase
@@ -20,8 +21,9 @@ object DomainModule {
     @Provides
     @Singleton
     fun provideMoviesRepository(
+        timeout: MovieApiTimeoutControl,
         usersApiService: MoviesApi
-    ): MoviesRepository = MoviesRepositoryImpl(usersApiService)
+    ): MoviesRepository = MoviesRepositoryImpl(usersApiService, timeout)
 
     @Provides
     @Singleton

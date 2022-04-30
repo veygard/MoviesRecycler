@@ -6,5 +6,6 @@
     <string name="movies_list_title">Обзоры фильмов</string>
     <string name="cd_poster">poster</string>
     <string name="snackbar_error_message">Не могу обновить данные.\nПроверь соединение с интернетом.</string>
+    <string name="snackbar_time_message">Гружу данные из сервера, потребуется %1$d секунд</string>
 
 </resources>

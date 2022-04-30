@@ -17,6 +17,11 @@ fun showToast(snackbarState: SnackbarTypes?, context: Context?) {
                 background = context.getColor(R.color.error)
                 textColor = context.getColor(R.color.white)
             }
+            is SnackbarTypes.RequestTimeOut -> {
+                text= context.getString(R.string.snackbar_time_message, snackbarState.pauseTime)
+                background = context.getColor(R.color.blue)
+                textColor = context.getColor(R.color.white)
+            }
         }
         Log.d("toast", "show toast")
         CustomToast(context, text, background, textColor = textColor).show()

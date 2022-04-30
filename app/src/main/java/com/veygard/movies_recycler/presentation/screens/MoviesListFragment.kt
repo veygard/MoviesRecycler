@@ -86,16 +86,16 @@ class MoviesListFragment : Fragment() {
     private fun setMovieRecyclerListener(gridLayoutManager: SpanGridLayoutManager) {
         binding?.movieRecyclerHolder?.addOnScrollListener(object: PaginationScrollListener(gridLayoutManager) {
             override fun loadMoreItems() {
-                if(viewModel.loadingIsNotBusy.value && isInternetConnected(activity?.applicationContext)) {
                     viewModel.loadMore()
                     adapter?.addShimmers()
-                }
             }
 
             override val isLastPage: Boolean
                 get() = false
-            override val isLoading: Boolean
-                get() = false
+            override val isInternetAvailable: Boolean
+                get() = isInternetConnected(activity?.applicationContext)
+            override val isReadyToLoad: Boolean
+                get() = viewModel.loadingIsNotBusy.value
         })
     }
 }

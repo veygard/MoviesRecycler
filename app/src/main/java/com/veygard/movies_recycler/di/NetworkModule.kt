@@ -1,6 +1,8 @@
 package com.veygard.movies_recycler.di
 
+import android.os.SystemClock
 import com.veygard.movies_recycler.data.remote.api.MoviesApi
+import com.veygard.movies_recycler.data.remote.supports.MovieApiTimeoutControl
 import com.veygard.movies_recycler.util.Constants
 import com.veygard.movies_recycler.util.Constants.BASE_URL
 import dagger.Module
@@ -27,6 +29,10 @@ object NetworkModule {
 
     @Provides
     @Singleton
+    fun provideMovieApiTimeoutControl(): MovieApiTimeoutControl = MovieApiTimeoutControl()
+
+    @Provides
+    @Singleton
     fun provideJson(): Json {
         return Json { ignoreUnknownKeys = true }
     }
@@ -40,39 +46,48 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideRemoteClient(): Retrofit {
+    fun provideRemoteClient(timeout: MovieApiTimeoutControl): Retrofit {
 
         return Retrofit.Builder()
             .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
-            .client(provideHttpClient())
+            .client(provideHttpClient(timeout))
             .build()
     }
 
 
     @Provides
     @Singleton
-    fun provideHttpClient(): OkHttpClient {
+    fun provideHttpClient(timeout: MovieApiTimeoutControl): OkHttpClient {
         val loggingInterceptor = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
+        val queryInterceptor = Interceptor { chain ->
+            val original: Request = chain.request()
+            val originalHttpUrl: HttpUrl = original.url
+            val url = originalHttpUrl.newBuilder()
+                .addQueryParameter("api-key", Constants.API_KEY)
+                .build()
+
+            val requestBuilder: Request.Builder = original.newBuilder()
+                .url(url)
+            val request: Request = requestBuilder.build()
+            chain.proceed(request)
+        }
+
+        /*у Api стоит запрет больше 10 запросов в минуту*/
+        val delayInterceptor  = Interceptor { chain ->
+            SystemClock.sleep(timeout.requestTimeOut)
+            chain.proceed(chain.request())
+        }
+
         return OkHttpClient.Builder()
             .addInterceptor(loggingInterceptor)
-            .addInterceptor(Interceptor { chain ->
-                val original: Request = chain.request()
-                val originalHttpUrl: HttpUrl = original.url
-                val url = originalHttpUrl.newBuilder()
-                    .addQueryParameter("api-key", Constants.API_KEY)
-                    .build()
-
-                val requestBuilder: Request.Builder = original.newBuilder()
-                    .url(url)
-                val request: Request = requestBuilder.build()
-                chain.proceed(request)
-            })
-            .connectTimeout(5, TimeUnit.SECONDS)
-            .writeTimeout(5, TimeUnit.SECONDS)
-            .readTimeout(5, TimeUnit.SECONDS)
+            .addNetworkInterceptor(delayInterceptor)
+            .addInterceptor(queryInterceptor)
+            .connectTimeout(10, TimeUnit.SECONDS)
+            .writeTimeout(10, TimeUnit.SECONDS)
+            .readTimeout(10, TimeUnit.SECONDS)
             .build()
     }
 
