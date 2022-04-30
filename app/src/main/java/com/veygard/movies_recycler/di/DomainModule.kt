@@ -6,6 +6,7 @@ import com.veygard.movies_recycler.domain.repository.MoviesRepository
 import com.veygard.movies_recycler.domain.repository.MoviesRepositoryImpl
 import com.veygard.movies_recycler.domain.use_cases.GetMoviesUseCase
 import com.veygard.movies_recycler.domain.use_cases.MoviesUseCases
+import com.veygard.movies_recycler.domain.use_cases.SearchMovieUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -30,7 +31,8 @@ object DomainModule {
     fun provideUseCases(
         moviesRepository: MoviesRepository,
     ): MoviesUseCases = MoviesUseCases(
-        getMoviesUseCase = GetMoviesUseCase(moviesRepository = moviesRepository)
+        getMoviesUseCase = GetMoviesUseCase(moviesRepository = moviesRepository),
+        searchMovieUseCase = SearchMovieUseCase(moviesRepository = moviesRepository)
     )
 
 }
