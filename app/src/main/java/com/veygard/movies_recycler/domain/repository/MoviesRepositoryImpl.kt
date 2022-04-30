@@ -48,6 +48,7 @@ class MoviesRepositoryImpl @Inject constructor(private val moviesApi:MoviesApi, 
 
     override suspend fun searchMovies(name: String, pageOffset:Int): GetMoviesResult {
         var result: GetMoviesResult = GetMoviesResult.EnqueueError("MoviesRepositoryImpl getMovies not working")
+        timeout.checkCounter()
         try {
             val call =  moviesApi.searchMovies(name, pageOffset)
             when{
