@@ -80,7 +80,7 @@ class MoviesViewModel @Inject constructor(
             _loadingIsNotBusy.value = false
             getMovies(true)
         } else {
-//            _showSnackbar.value =
+            _showSnackbar.value = SnackbarTypes.NoMoviesLeft
         }
     }
 

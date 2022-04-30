@@ -27,7 +27,7 @@ class MovieApiTimeoutControl {
             in 5..7-> {
                 requestTimeOut = midRequestTimeOut
             }
-            in 7..10 -> {
+            in 7..11 -> {
                 requestTimeOut = longRequestTimeOut
             }
 

@@ -22,6 +22,13 @@ fun showToast(snackbarState: SnackbarTypes?, context: Context?) {
                 background = context.getColor(R.color.blue)
                 textColor = context.getColor(R.color.white)
             }
+
+            SnackbarTypes.NoMoviesLeft ->{
+                text= context.getString(R.string.snackbar_no_movies_message)
+                background = context.getColor(R.color.background_night)
+                textColor = context.getColor(R.color.white)
+            }
+            
         }
         Log.d("toast", "show toast")
         CustomToast(context, text, background, textColor = textColor).show()
