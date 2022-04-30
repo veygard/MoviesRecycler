@@ -18,66 +18,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             android:gravity="center"
-            android:text="@string/movies_list_title"
-            app:layout_constraintBottom_toTopOf="@+id/search_bar" />
-
-    <android.widget.SearchView
-            android:id="@+id/search_bar"
-            android:layout_width="0dp"
-            android:layout_height="48dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/cancelButton"
-            app:layout_constraintTop_toBottomOf="@id/list_title"
-            app:layout_constraintBottom_toTopOf="@id/movie_recycler_holder"
-            android:searchIcon="@drawable/none"
-            android:visibility="visible"
-            android:iconifiedByDefault="false"
-            android:background="@drawable/bg_rounded"
-            app:defaultQueryHint="@string/search_field_placeholder"
-            app:queryHint="@string/search_field_placeholder"
-            android:focusable="false"
-            android:paddingStart="-10dp"
-            android:focusableInTouchMode="true"
-            app:theme="@style/SearchViewStyle"
-            android:queryBackground="@android:color/transparent"
-            android:searchHintIcon="@drawable/none"
-            android:closeIcon="@drawable/none"
-            android:layout_marginTop="24dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginEnd="16dp"
-            android:layout_marginStart="16dp"
-            tools:ignore="RtlSymmetry" />
-
-    <ImageView
-            android:id="@+id/search_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@null"
-            android:src="@drawable/ic_search"
-            tools:ignore="HardcodedText,TouchTargetSizeCheck"
-            app:layout_constraintBottom_toBottomOf="@+id/search_bar"
-            app:layout_constraintTop_toTopOf="@+id/search_bar"
-            app:layout_constraintStart_toStartOf="@+id/search_bar"
-            android:layout_marginStart="14dp"
-            android:contentDescription="search" />
-
-    <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/cancelButton"
-            android:visibility="gone"
-            android:clickable="true"
-            android:layout_width="54sp"
-            android:layout_height="wrap_content"
-            android:background="@color/transparent"
-            android:text="@string/cancel_button_title"
-            android:textAllCaps="false"
-            android:textColor="@color/blue"
-            android:textSize="14sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/search_bar"
-            android:layout_marginEnd="16dp"
-            app:layout_constraintBottom_toBottomOf="@+id/search_bar"
-            android:focusable="true" />
-
+            android:text="@string/movies_list_title" />
 
     <androidx.recyclerview.widget.RecyclerView
             android:layout_width="match_parent"
@@ -89,10 +30,9 @@
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
             tools:listitem="@layout/movie_item"
-            app:layout_constraintTop_toBottomOf="@+id/search_bar"
+            app:layout_constraintTop_toBottomOf="@+id/list_title"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:paddingBottom="64dp"
-            android:layout_marginTop="8dp" />
+            android:paddingBottom="64dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
