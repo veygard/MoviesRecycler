@@ -27,7 +27,7 @@ class MoviesViewModel @Inject constructor(
     private var pageOffset = 0
     private var searchPageOffset = 0
     private var movieList = mutableListOf<Movie>()
-    private var searchValue= ""
+    private var searchValue = ""
 
 
     private val _getMoviesResponse: MutableLiveData<MoviesStateVM?> = MutableLiveData(null)
@@ -40,13 +40,13 @@ class MoviesViewModel @Inject constructor(
     val loadingIsNotBusy: LiveData<Boolean> = _loadingIsNotBusy
 
     private val _showLoadingBar = MutableLiveData(false)
-    val showLoadingBar: LiveData<Boolean> =  _showLoadingBar
+    val showLoadingBar: LiveData<Boolean> = _showLoadingBar
 
     private val _irSearchOn = MutableLiveData(false)
-    val irSearchOn: LiveData<Boolean> =  _irSearchOn
+    val irSearchOn: LiveData<Boolean> = _irSearchOn
 
     private val _hasMoreMovies = MutableLiveData(false)
-    val hasMoreMovies: LiveData<Boolean> =  _hasMoreMovies
+    val hasMoreMovies: LiveData<Boolean> = _hasMoreMovies
 
 
     fun getMovies(isAdditionalLoading: Boolean = false) {
@@ -79,11 +79,11 @@ class MoviesViewModel @Inject constructor(
     }
 
     fun loadMore() {
-        if(_irSearchOn.value){
+        if (_irSearchOn.value) {
             if (_hasMoreMovies.value) {
-                searchMovie(searchValue)
+                searchMovie(searchValue, true)
             }
-        }else {
+        } else {
             if (_hasMoreMovies.value) {
                 _loadingIsNotBusy.value = false
                 getMovies(true)
@@ -93,19 +93,25 @@ class MoviesViewModel @Inject constructor(
         }
     }
 
-    fun searchMovie(name: String) {
+    fun searchMovie(name: String, isAdditionalLoading: Boolean = false) {
         viewModelScope.launch {
-            searchValue= name
-            _irSearchOn.value= true
+            if (name != searchValue) searchPageOffset = 0
+            searchValue = name
+            _irSearchOn.value = true
 
             _showLoadingBar.value = true
-            when (val result = moviesUseCases.searchMovieUseCase.start(name)) {
+            when (val result = moviesUseCases.searchMovieUseCase.start(name, searchPageOffset)) {
                 is GetMoviesResult.Success -> {
                     _hasMoreMovies.value = result.response.has_more ?: false
                     searchPageOffset += result.response.num_results ?: 0
-                    _getMoviesResponse.value =
-                        MoviesStateVM.SearchMovies(result.response.results ?: emptyList())
                     _showLoadingBar.value = false
+                    when (isAdditionalLoading) {
+                        true -> _getMoviesResponse.value =
+                            MoviesStateVM.MoreMovies(result.response.results)
+                        false -> _getMoviesResponse.value =
+                            MoviesStateVM.SearchMovies(result.response.results ?: emptyList())
+
+                    }
                 }
                 else -> {
                     _showLoadingBar.value = false
@@ -116,10 +122,11 @@ class MoviesViewModel @Inject constructor(
         }
     }
 
-    fun turnOffSearch(){
-        _irSearchOn.value= false
+    fun turnOffSearch() {
+        _irSearchOn.value = false
         _hasMoreMovies.value = true
-        if(movieList.isNotEmpty()) _getMoviesResponse.value = MoviesStateVM.GotMovies(movieList)
+        searchPageOffset = 0
+        if (movieList.isNotEmpty()) _getMoviesResponse.value = MoviesStateVM.GotMovies(movieList)
         else getMovies()
     }
 }

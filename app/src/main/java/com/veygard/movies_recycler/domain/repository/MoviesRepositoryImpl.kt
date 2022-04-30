@@ -46,10 +46,10 @@ class MoviesRepositoryImpl @Inject constructor(private val moviesApi:MoviesApi, 
 
     }
 
-    override suspend fun searchMovies(name: String): GetMoviesResult {
+    override suspend fun searchMovies(name: String, pageOffset:Int): GetMoviesResult {
         var result: GetMoviesResult = GetMoviesResult.EnqueueError("MoviesRepositoryImpl getMovies not working")
         try {
-            val call =  moviesApi.searchMovies(name)
+            val call =  moviesApi.searchMovies(name, pageOffset)
             when{
                 call.isSuccessful->{
                     call.body()?.let {

@@ -96,7 +96,7 @@ class MoviesListFragment : Fragment() {
                 text.isNotEmpty() -> {
                     mHandler.postDelayed(Runnable {
                         viewModel.searchMovie(text)
-                    }, 700)
+                    }, 600)
                 }
                 else -> {
                     viewModel.turnOffSearch()
