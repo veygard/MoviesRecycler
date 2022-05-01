@@ -81,6 +81,13 @@ class MoviesListFragment : Fragment() {
                 showToast(it, activity?.applicationContext)
             }
         }
+
+        viewModel.showLoadingBar.addObserver {result ->
+            when(result){
+                true -> toggleVisibility(false, binding?.loadingBar)
+                false -> toggleVisibility(true, binding?.loadingBar)
+            }
+        }
     }
 
     private fun setupMovieRecycler(results: List<Movie>?) {
