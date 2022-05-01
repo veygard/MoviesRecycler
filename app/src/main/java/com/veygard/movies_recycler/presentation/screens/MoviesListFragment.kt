@@ -19,7 +19,6 @@ import com.veygard.movies_recycler.presentation.navigation.MoviesListRouterImpl
 import com.veygard.movies_recycler.presentation.viewmodel.MoviesStateVM
 import com.veygard.movies_recycler.presentation.viewmodel.MoviesViewModel
 import com.veygard.movies_recycler.util.SpanGridLayoutManager
-import com.veygard.movies_recycler.util.extentions.onQueryTextChanged
 import com.veygard.movies_recycler.util.isInternetConnected
 import com.veygard.movies_recycler.util.showToast
 
@@ -37,6 +36,7 @@ class MoviesListFragment : Fragment() {
 
     private var searchCountDownTimer: CountDownTimer? = null
     private val searchWaitingTime = 1000L
+    private var searchTextValue = ""
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -92,28 +92,39 @@ class MoviesListFragment : Fragment() {
     }
 
     private fun searchViewListener() {
-        binding?.searchBar?.onQueryTextChanged { text ->
 
-            when {
-                text.isNotEmpty() -> {
-                    searchCountDownTimer?.cancel()
-                    searchCountDownTimer= object : CountDownTimer(searchWaitingTime, 500){
-                        override fun onTick(p0: Long) {}
-                        override fun onFinish() {
-                            Log.d("pagination_test","countDownTimer: onFinish, text: $text")
-                            viewModel.searchMovie(text)
+        binding?.searchBar?.setOnQueryTextListener(object :
+            android.widget.SearchView.OnQueryTextListener {
+            override fun onQueryTextChange(text: String?): Boolean {
+                searchTextValue = text ?: ""
+                when {
+                    searchTextValue.isNotEmpty() -> {
+                        searchCountDownTimer?.cancel()
+                        searchCountDownTimer = object : CountDownTimer(searchWaitingTime, 500) {
+                            override fun onTick(p0: Long) {}
+                            override fun onFinish() {
+                                Log.d("search_test", "countDownTimer: onFinish, text: $text")
+                                if(viewModel.requestIsRdy.value)viewModel.searchMovie(searchTextValue)
+                            }
                         }
+                        searchCountDownTimer?.start()
                     }
-                    searchCountDownTimer?.start()
+                    else -> {
+                        viewModel.turnOffSearch()
+                    }
                 }
-                else -> {
-                    viewModel.turnOffSearch()
-                }
+                toggleVisibility( searchTextValue.isEmpty(), binding?.cancelButton)
+                toggleSearchViewIconColor(searchTextValue.isNotEmpty())
+                return false
             }
-            toggleVisibility(text.isEmpty(), binding?.cancelButton)
-            toggleSearchViewIconColor(text.isNotEmpty())
-        }
-    }
+
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                Log.d("search_test", "search enter event, text: $searchTextValue, query: $query")
+                if(viewModel.requestIsRdy.value)viewModel.searchMovie(searchTextValue)
+                return false
+            }
+        })
+     }
 
 
     private fun cancelButtonListener() {
@@ -136,7 +147,7 @@ class MoviesListFragment : Fragment() {
             override val isInternetAvailable: Boolean
                 get() = isInternetConnected(activity?.applicationContext)
             override val isReadyToLoad: Boolean
-                get() = viewModel.loadingIsNotBusy.value
+                get() = viewModel.requestIsRdy.value
             override val hasMoreMovies: Boolean
                 get() = viewModel.hasMoreMovies.value
         })
