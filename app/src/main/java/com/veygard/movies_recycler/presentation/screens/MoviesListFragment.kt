@@ -2,7 +2,8 @@ package com.veygard.movies_recycler.presentation.screens
 
 import android.graphics.Color
 import android.os.Bundle
-import android.os.Handler
+import android.os.CountDownTimer
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,6 +23,7 @@ import com.veygard.movies_recycler.util.extentions.onQueryTextChanged
 import com.veygard.movies_recycler.util.isInternetConnected
 import com.veygard.movies_recycler.util.showToast
 
+
 class MoviesListFragment : Fragment() {
 
     private val viewModel: MoviesViewModel by activityViewModels()
@@ -32,8 +34,9 @@ class MoviesListFragment : Fragment() {
     private var adapter: MovieListAdapter? = null
 
     private var binding: FragmentMoviesListScreenBinding? = null
-    private var mHandler = Handler()
 
+    private var searchCountDownTimer: CountDownTimer? = null
+    private val searchWaitingTime = 1000L
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -90,23 +93,28 @@ class MoviesListFragment : Fragment() {
 
     private fun searchViewListener() {
         binding?.searchBar?.onQueryTextChanged { text ->
-            mHandler.removeCallbacksAndMessages(null)
 
             when {
                 text.isNotEmpty() -> {
-                    mHandler.postDelayed(Runnable {
-                        viewModel.searchMovie(text)
-                    }, 600)
+                    searchCountDownTimer?.cancel()
+                    searchCountDownTimer= object : CountDownTimer(searchWaitingTime, 500){
+                        override fun onTick(p0: Long) {}
+                        override fun onFinish() {
+                            Log.d("pagination_test","countDownTimer: onFinish, text: $text")
+                            viewModel.searchMovie(text)
+                        }
+                    }
+                    searchCountDownTimer?.start()
                 }
                 else -> {
                     viewModel.turnOffSearch()
                 }
             }
-
             toggleVisibility(text.isEmpty(), binding?.cancelButton)
             toggleSearchViewIconColor(text.isNotEmpty())
         }
     }
+
 
     private fun cancelButtonListener() {
         binding?.cancelButton?.setOnClickListener {
