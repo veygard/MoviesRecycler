@@ -1,5 +1,6 @@
 package com.veygard.movies_recycler.presentation.viewmodel
 
+import android.app.Application
 import android.util.Log
 import com.veygard.movies_recycler.data.remote.model.Movie
 import com.veygard.movies_recycler.domain.model.MovieWithShimmer
@@ -7,6 +8,7 @@ import com.veygard.movies_recycler.domain.model.toMovieShimmerList
 import com.veygard.movies_recycler.domain.repository.GetMoviesResult
 import com.veygard.movies_recycler.domain.use_cases.MoviesUseCases
 import com.veygard.movies_recycler.util.SnackbarTypes
+import com.veygard.movies_recycler.util.isInternetConnected
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.icerock.moko.mvvm.livedata.LiveData
 import dev.icerock.moko.mvvm.livedata.MutableLiveData
@@ -14,8 +16,11 @@ import dev.icerock.moko.mvvm.viewmodel.ViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+
+
 @HiltViewModel
 class MoviesViewModel @Inject constructor(
+    private val application: Application,
     private val moviesUseCases: MoviesUseCases
 ) : ViewModel() {
 
@@ -39,20 +44,21 @@ class MoviesViewModel @Inject constructor(
     private val _showLoadingBar = MutableLiveData(false)
     val showLoadingBar: LiveData<Boolean> = _showLoadingBar
 
+    private val _listSize = MutableLiveData(0)
+    val listSize: LiveData<Int> = _listSize
 
-    private val _hasMoreMovies = MutableLiveData(false)
-    val hasMoreMovies: LiveData<Boolean> = _hasMoreMovies
-
+    private var hasMoreMovies = false
 
     fun getMovies() {
         viewModelScope.launch {
             when (val result = moviesUseCases.getMoviesUseCase.start(pageOffset)) {
                 is GetMoviesResult.Success -> {
                     pageOffset += result.response.num_results ?: 0
-                    _hasMoreMovies.value = result.response.has_more ?: false
+                    hasMoreMovies = result.response.has_more ?: false
                     _requestIsRdy.value = true
                     removeShimmers()
                     result.response.results?.let { movieListStorage.addAll(it.toMovieShimmerList()) }
+                    _listSize.value = movieListStorage.size
                     _getMoviesResponse.value = MoviesStateVM.GotMovies(movieListStorage)
                 }
                 else -> {
@@ -69,22 +75,29 @@ class MoviesViewModel @Inject constructor(
     }
 
     fun loadMore() {
-        addShimmers()
-        _getMoviesResponse.value = MoviesStateVM.Loading(
-            if(irSearchOn) movieSearchListStorage else movieListStorage
-        )
+        val isInternetConnected = isInternetConnected(application.applicationContext)
+        when {
+            isInternetConnected && hasMoreMovies -> {
+                addShimmers()
+                _getMoviesResponse.value = MoviesStateVM.Loading(
+                    if (irSearchOn) movieSearchListStorage else movieListStorage
+                )
 
-        if (irSearchOn) {
-            if (_hasMoreMovies.value) {
-                searchMovie(searchValue, true)
+                if (irSearchOn) {
+                    if (hasMoreMovies) {
+                        searchMovie(searchValue, true)
+                    }
+                } else {
+                    if (hasMoreMovies) {
+                        _requestIsRdy.value = false
+                        getMovies()
+                    } else {
+                        _showSnackbar.value = SnackbarTypes.NoMoviesLeft
+                    }
+                }
             }
-        } else {
-            if (_hasMoreMovies.value) {
-                _requestIsRdy.value = false
-                getMovies()
-            } else {
-                _showSnackbar.value = SnackbarTypes.NoMoviesLeft
-            }
+            !isInternetConnected -> _showSnackbar.value = SnackbarTypes.ConnectionError
+            !hasMoreMovies -> _showSnackbar.value = SnackbarTypes.NoMoviesLeft
         }
     }
 
@@ -105,7 +118,7 @@ class MoviesViewModel @Inject constructor(
             when (val result = moviesUseCases.searchMovieUseCase.start(name, searchPageOffset)) {
                 is GetMoviesResult.Success -> {
                     _requestIsRdy.value = true
-                    _hasMoreMovies.value = result.response.has_more ?: false
+                    hasMoreMovies = result.response.has_more ?: false
                     searchPageOffset += result.response.num_results ?: 0
                     _showLoadingBar.value = false
                     when (isAdditionalLoading) {
@@ -115,6 +128,7 @@ class MoviesViewModel @Inject constructor(
                                 result.response.results?.toMovieShimmerList()
                                     ?: emptyList()
                             )
+                            _listSize.value = movieSearchListStorage.size
                             _getMoviesResponse.value =
                                 MoviesStateVM.SearchMovies(movieSearchListStorage)
 
@@ -124,6 +138,7 @@ class MoviesViewModel @Inject constructor(
                             movieSearchListStorage.addAll(
                                 result.response.results?.toMovieShimmerList() ?: emptyList()
                             )
+                            _listSize.value = movieSearchListStorage.size
                             _getMoviesResponse.value =
                                 MoviesStateVM.SearchMovies(movieSearchListStorage)
                         }
@@ -147,21 +162,32 @@ class MoviesViewModel @Inject constructor(
     }
 
     private fun addShimmers() {
-        for (i in 0..20) {
+        for (i in 0..shimmer_count) {
             when (irSearchOn) {
-                true -> movieSearchListStorage.add(MovieWithShimmer.Shimmer)
-                false -> movieListStorage.add(MovieWithShimmer.Shimmer)
+                true -> {
+                    movieSearchListStorage.add(MovieWithShimmer.Shimmer)
+                    _listSize.value = movieSearchListStorage.size
+                }
+                false -> {
+                    movieListStorage.add(MovieWithShimmer.Shimmer)
+                    _listSize.value = movieListStorage.size
+                }
             }
         }
     }
 
     fun turnOffSearch() {
         irSearchOn = false
-        _hasMoreMovies.value = true
+        _listSize.value = 0
+        hasMoreMovies = true
         searchPageOffset = 0
         movieSearchListStorage = mutableListOf()
         if (movieListStorage.isNotEmpty()) _getMoviesResponse.value =
             MoviesStateVM.GotMovies(movieListStorage)
         else getMovies()
+    }
+
+    companion object {
+        const val shimmer_count = 5
     }
 }

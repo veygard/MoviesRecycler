@@ -18,6 +18,7 @@ class SpanGridLayoutManager(context: Context?, private var columnWidth: Int) :
                 height - paddingTop - paddingBottom
             }
             val spanCount = max(1, totalSpace / columnWidth)
+
             setSpanCount(spanCount)
         }
         super.onLayoutChildren(recycler, state)

@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.recyclerview.widget.RecyclerView
 import com.veygard.movies_recycler.R
 import com.veygard.movies_recycler.databinding.FragmentMoviesListScreenBinding
 import com.veygard.movies_recycler.presentation.adapters.MovieListAdapter
@@ -37,6 +38,8 @@ class MoviesListFragment : Fragment() {
     private val searchWaitingTime = 1000L
     private var searchTextValue = ""
 
+    private  lateinit var  gridLayoutManager: SpanGridLayoutManager
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -56,7 +59,7 @@ class MoviesListFragment : Fragment() {
     private fun setUpRecyclerView() {
         adapter = MovieListAdapter()
         binding?.movieRecyclerHolder?.adapter = adapter
-        val gridLayoutManager = SpanGridLayoutManager(activity?.baseContext, 500)
+        gridLayoutManager = SpanGridLayoutManager(activity?.baseContext, 500)
         binding?.movieRecyclerHolder?.layoutManager = gridLayoutManager
         setMovieRecyclerListener(gridLayoutManager)
     }
@@ -64,8 +67,13 @@ class MoviesListFragment : Fragment() {
     private fun observeData() {
         viewModel.getMoviesResponse.addObserver { result ->
             when (result) {
-                is MoviesStateVM.GotMovies, is MoviesStateVM.Loading, is MoviesStateVM.SearchMovies  -> {
+                is MoviesStateVM.GotMovies, is MoviesStateVM.SearchMovies  -> {
                     adapter?.submitList(result.movieList?.toMutableList())
+                }
+                is MoviesStateVM.Loading -> {
+                    adapter?.submitList(result.movieList?.toMutableList())
+                    //после добавления шимера скролим вниз, чтобы показать что он есть
+                    binding?.movieRecyclerHolder?.let { gridLayoutManager.smoothScrollToPosition(it, RecyclerView.State(), gridLayoutManager.findLastCompletelyVisibleItemPosition() +2) }
                 }
                 is MoviesStateVM.Error -> {
                     router.routeToCriticalErrorScreen()
@@ -142,14 +150,10 @@ class MoviesListFragment : Fragment() {
                 viewModel.loadMore()
             }
 
-            override val isLastPage: Boolean
-                get() = false
-            override val isInternetAvailable: Boolean
-                get() = isInternetConnected(activity?.applicationContext)
             override val isReadyToLoad: Boolean
                 get() = viewModel.requestIsRdy.value
-            override val hasMoreMovies: Boolean
-                get() = viewModel.hasMoreMovies.value
+            override val listSize: Int
+                get() = viewModel.listSize.value
         })
     }
 
