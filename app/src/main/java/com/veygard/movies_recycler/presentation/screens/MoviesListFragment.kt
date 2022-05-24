@@ -12,6 +12,8 @@ import androidx.fragment.app.activityViewModels
 import com.veygard.movies_recycler.R
 import com.veygard.movies_recycler.data.remote.model.Movie
 import com.veygard.movies_recycler.databinding.FragmentMoviesListScreenBinding
+import com.veygard.movies_recycler.domain.model.MovieWithShimmer
+import com.veygard.movies_recycler.domain.model.toMovieShimmerList
 import com.veygard.movies_recycler.presentation.adapters.MovieListAdapter
 import com.veygard.movies_recycler.presentation.adapters.PaginationScrollListener
 import com.veygard.movies_recycler.presentation.navigation.MoviesListRouter
@@ -65,7 +67,7 @@ class MoviesListFragment : Fragment() {
 
                 is MoviesStateVM.MoreMovies -> {
                     result.more?.let {
-                        adapter?.addNewItems(it)
+                        adapter?.submitList(it.toMovieShimmerList())
                     }
                 }
                 is MoviesStateVM.MoreMoviesError -> adapter?.removeShimmers()
@@ -146,7 +148,8 @@ class MoviesListFragment : Fragment() {
             PaginationScrollListener(gridLayoutManager) {
             override fun loadMoreItems() {
                 viewModel.loadMore()
-                adapter?.addShimmers()
+                adapter?.shimmerList?.addAll(addShimmers())
+                adapter?.submitList( adapter?.shimmerList)
             }
 
             override val isLastPage: Boolean
@@ -174,5 +177,13 @@ class MoviesListFragment : Fragment() {
         else icon?.setColorFilter(
             context?.getColor(R.color.grey) ?: Color.LTGRAY
         )
+    }
+
+    fun addShimmers(): List<MovieWithShimmer.Shimmer> {
+        val list= mutableListOf<MovieWithShimmer.Shimmer>()
+        for (i in 0..20) {
+            list.add(MovieWithShimmer.Shimmer)
+        }
+        return list.toList()
     }
 }

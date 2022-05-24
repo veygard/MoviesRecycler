@@ -10,16 +10,19 @@ import com.veygard.movies_recycler.databinding.MovieItemShimmerBinding
 import com.veygard.movies_recycler.domain.model.MovieWithShimmer
 import com.veygard.movies_recycler.domain.model.RowType
 import com.veygard.movies_recycler.domain.model.toMovieShimmerList
+import androidx.recyclerview.widget.ListAdapter
+import com.veygard.movies_recycler.presentation.supports.MovieDiffUtilCallback
 
-class MovieListAdapter(private val movieList: List<Movie>): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-    private var list = mutableListOf<MovieWithShimmer>()
+class MovieListAdapter(private val movieList: List<Movie>) :
+    ListAdapter<MovieWithShimmer, MovieTypesViewHolder>(MovieDiffUtilCallback()) {
+    var shimmerList = mutableListOf<MovieWithShimmer>()
 
     init {
-        Log.d("pagination_test","adapter init")
-        list.addAll(movieList.toMovieShimmerList())
+        Log.d("pagination_test", "adapter init")
+        shimmerList.addAll(movieList.toMovieShimmerList())
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MovieTypesViewHolder {
         return when (RowType.values()[viewType]) {
             RowType.Item -> {
                 val binding =
@@ -28,44 +31,36 @@ class MovieListAdapter(private val movieList: List<Movie>): RecyclerView.Adapter
             }
             RowType.Shimmer -> {
                 val binding =
-                    MovieItemShimmerBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                    MovieItemShimmerBinding.inflate(
+                        LayoutInflater.from(parent.context),
+                        parent,
+                        false
+                    )
                 MovieShimmerViewHolder(binding)
             }
         }
     }
 
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) =
-        when (val groups = list[position]) {
+    override fun onBindViewHolder(holder: MovieTypesViewHolder, position: Int) =
+        when (val groups = shimmerList[position]) {
             is MovieWithShimmer.Movies -> (holder as MovieViewHolder).bind(groups.movie)
             is MovieWithShimmer.Shimmer -> (holder as MovieShimmerViewHolder).bind()
         }
 
     override fun getItemViewType(position: Int): Int =
-        list[position].rowType.ordinal
+        shimmerList[position].rowType.ordinal
 
-    override fun getItemCount(): Int =  list.size
 
-    fun addNewItems(items: List<Movie>){
+    fun addNewItems(items: List<Movie>) {
         removeShimmers()
-        list.addAll(items.toMovieShimmerList())
-        notifyDataSetChanged()
+        shimmerList.addAll(items.toMovieShimmerList())
     }
 
-    fun addShimmers(){
-        for(i in 0..20){
-            list.add(MovieWithShimmer.Shimmer)
-        }
-        notifyDataSetChanged()
+
+
+    fun removeShimmers() {
+        shimmerList.removeAll { it is MovieWithShimmer.Shimmer }
     }
 
-    fun removeShimmers(){
-//        val iterator= list.iterator()
-//        while (iterator.hasNext()){
-//            val item = iterator.next()
-//            if (item.rowType == RowType.Shimmer) iterator.remove()
-//        }
-        list.removeAll { it is MovieWithShimmer.Shimmer}
-        notifyDataSetChanged()
-    }
 
 }

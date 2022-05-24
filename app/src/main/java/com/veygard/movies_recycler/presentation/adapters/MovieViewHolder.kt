@@ -10,7 +10,7 @@ import com.veygard.movies_recycler.databinding.MovieItemBinding
 
 class MovieViewHolder(
     private val binding: MovieItemBinding,
-): RecyclerView.ViewHolder(binding.root) {
+): MovieTypesViewHolder(binding) {
     companion object{
          var movieItemHeight = 0
     }
