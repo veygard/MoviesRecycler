@@ -10,10 +10,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.veygard.movies_recycler.R
-import com.veygard.movies_recycler.data.remote.model.Movie
 import com.veygard.movies_recycler.databinding.FragmentMoviesListScreenBinding
-import com.veygard.movies_recycler.domain.model.MovieWithShimmer
-import com.veygard.movies_recycler.domain.model.toMovieShimmerList
 import com.veygard.movies_recycler.presentation.adapters.MovieListAdapter
 import com.veygard.movies_recycler.presentation.adapters.PaginationScrollListener
 import com.veygard.movies_recycler.presentation.navigation.MoviesListRouter
@@ -50,30 +47,32 @@ class MoviesListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setUpRecyclerView()
         observeData()
         searchViewListener()
         cancelButtonListener()
     }
 
+    private fun setUpRecyclerView() {
+        adapter = MovieListAdapter()
+        binding?.movieRecyclerHolder?.adapter = adapter
+        val gridLayoutManager = SpanGridLayoutManager(activity?.baseContext, 500)
+        binding?.movieRecyclerHolder?.layoutManager = gridLayoutManager
+        setMovieRecyclerListener(gridLayoutManager)
+    }
+
     private fun observeData() {
         viewModel.getMoviesResponse.addObserver { result ->
             when (result) {
-                is MoviesStateVM.GotMovies -> {
-                    setupMovieRecycler(result.list)
+                is MoviesStateVM.GotMovies, is MoviesStateVM.Loading, is MoviesStateVM.SearchMovies  -> {
+                    adapter?.submitList(result.movieList?.toMutableList())
                 }
                 is MoviesStateVM.Error -> {
                     router.routeToCriticalErrorScreen()
                 }
-
-                is MoviesStateVM.MoreMovies -> {
-                    result.more?.let {
-                        adapter?.submitList(it.toMovieShimmerList())
-                    }
-                }
-                is MoviesStateVM.MoreMoviesError -> adapter?.removeShimmers()
-
-                is MoviesStateVM.SearchMovies -> {
-                    setupMovieRecycler(result.list)
+                is MoviesStateVM.MoreMoviesError -> {}
+                is MoviesStateVM.ClearMovieList -> {
+                    adapter?.submitList(null)
                 }
             }
         }
@@ -92,16 +91,8 @@ class MoviesListFragment : Fragment() {
         }
     }
 
-    private fun setupMovieRecycler(results: List<Movie>?) {
-        adapter = MovieListAdapter(movieList = results ?: emptyList())
-        binding?.movieRecyclerHolder?.adapter = adapter
-        val gridLayoutManager = SpanGridLayoutManager(activity?.baseContext, 500)
-        binding?.movieRecyclerHolder?.layoutManager = gridLayoutManager
-        setMovieRecyclerListener(gridLayoutManager)
-    }
 
     private fun searchViewListener() {
-
         binding?.searchBar?.setOnQueryTextListener(object :
             android.widget.SearchView.OnQueryTextListener {
             override fun onQueryTextChange(text: String?): Boolean {
@@ -118,6 +109,7 @@ class MoviesListFragment : Fragment() {
                         }
                         searchCountDownTimer?.start()
                     }
+
                     else -> {
                         viewModel.turnOffSearch()
                     }
@@ -148,8 +140,6 @@ class MoviesListFragment : Fragment() {
             PaginationScrollListener(gridLayoutManager) {
             override fun loadMoreItems() {
                 viewModel.loadMore()
-                adapter?.shimmerList?.addAll(addShimmers())
-                adapter?.submitList( adapter?.shimmerList)
             }
 
             override val isLastPage: Boolean
@@ -179,11 +169,4 @@ class MoviesListFragment : Fragment() {
         )
     }
 
-    fun addShimmers(): List<MovieWithShimmer.Shimmer> {
-        val list= mutableListOf<MovieWithShimmer.Shimmer>()
-        for (i in 0..20) {
-            list.add(MovieWithShimmer.Shimmer)
-        }
-        return list.toList()
-    }
 }

@@ -3,16 +3,17 @@ package com.veygard.movies_recycler.domain.model
 import com.veygard.movies_recycler.data.remote.model.Movie
 
 sealed class MovieWithShimmer(
-    val rowType: RowType
+    val rowType: RowType,
+    open val movie: Movie? = null
 ){
-    data class Movies(val movie: Movie) :
-        MovieWithShimmer(RowType.Item)
+    data class Movies(override val movie: Movie) :
+        MovieWithShimmer(RowType.Movie, movie = movie)
 
      object Shimmer : MovieWithShimmer(RowType.Shimmer)
 }
 
 enum class RowType {
-    Item,
+    Movie,
     Shimmer
 }
 
